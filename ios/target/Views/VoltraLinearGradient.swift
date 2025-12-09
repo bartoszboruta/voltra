@@ -1,12 +1,3 @@
-//
-//  VoltraLinearGradient.swift
-//  Voltra
-//
-//  Created by Saul Sharma.
-//
-//  MIT LICENSE
-//
-
 import SwiftUI
 
 public struct VoltraLinearGradient: View {
