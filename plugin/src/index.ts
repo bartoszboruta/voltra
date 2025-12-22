@@ -1,20 +1,32 @@
-import { IOSConfig, withPlugins } from 'expo/config-plugins'
+import { IOSConfig } from 'expo/config-plugins'
 
+import { IOS } from './constants'
+import { withIOS } from './features/ios'
+import { withPushNotifications } from './features/pushNotifications'
 import type { VoltraConfigPlugin } from './types'
-import { withConfig } from './withConfig'
-import withPlist from './withPlist'
-import { withPodfile } from './withPodfile'
-import { withPushNotifications } from './withPushNotifications'
-import { withWidgetAssets } from './withWidgetAssets'
-import { withWidgetExtensionEntitlements } from './withWidgetExtensionEntitlements'
-import { withWidgets } from './withWidgets'
-import { withXcode } from './withXcode'
+import { ensureURLScheme } from './utils'
+import { validateProps } from './validation'
 
+/**
+ * Main Voltra config plugin.
+ *
+ * This plugin configures your Expo app for:
+ * - Live Activities (Dynamic Island + Lock Screen)
+ * - Home Screen Widgets
+ * - Push Notifications for Live Activities (optional)
+ */
 const withVoltra: VoltraConfigPlugin = (config, props) => {
-  const deploymentTarget = '17.0'
+  // Validate props at entry point
+  validateProps(props)
+
+  const deploymentTarget = IOS.DEPLOYMENT_TARGET
   const targetName = `${IOSConfig.XcodeUtils.sanitizedName(config.name)}LiveActivity`
   const bundleIdentifier = `${config.ios?.bundleIdentifier}.${targetName}`
 
+  // Ensure URL scheme is set for widget deep linking
+  config = ensureURLScheme(config)
+
+  // Add Live Activities support to main app Info.plist
   config.ios = {
     ...config.ios,
     infoPlist: {
@@ -24,52 +36,19 @@ const withVoltra: VoltraConfigPlugin = (config, props) => {
       ...(props?.groupIdentifier ? { Voltra_AppGroupIdentifier: props.groupIdentifier } : {}),
       // Store widget IDs in Info.plist for native module to access
       ...(props?.widgets && props.widgets.length > 0 ? { Voltra_WidgetIds: props.widgets.map((w) => w.id) } : {}),
-      // Ensure the main app has a URL scheme set so widgetURL can open it (optional feature)
-      ...(function ensureURLScheme(existing: Record<string, any>) {
-        const scheme =
-          typeof (config as any).scheme === 'string' ? (config as any).scheme : config.ios?.bundleIdentifier
-        if (!scheme) return {}
-        const existingTypes = (existing.CFBundleURLTypes as any[]) || []
-        const hasScheme = existingTypes.some(
-          (t) => Array.isArray(t?.CFBundleURLSchemes) && t.CFBundleURLSchemes.includes(scheme)
-        )
-        if (hasScheme) return {}
-        return {
-          CFBundleURLTypes: [
-            ...existingTypes,
-            {
-              CFBundleURLSchemes: [scheme],
-            },
-          ],
-        }
-      })(config.ios?.infoPlist || {}),
     },
   }
 
-  config = withPlugins(config, [
-    // Generate widget extension files (Info.plist, Assets.xcassets, user images)
-    [withWidgetAssets, { targetName }],
-    // Generate Swift files (VoltraWidgetBundle.swift, VoltraWidgetInitialStates.swift)
-    [withWidgets, { targetName, widgets: props?.widgets }],
-    // Generate entitlements file
-    [withWidgetExtensionEntitlements, { targetName, groupIdentifier: props?.groupIdentifier }],
-    // Configure Xcode project (must run after files are generated)
-    [
-      withXcode,
-      {
-        targetName,
-        bundleIdentifier,
-        deploymentTarget,
-      },
-    ],
-    // Update Info.plist with URL schemes
-    [withPlist, { targetName, groupIdentifier: props?.groupIdentifier }],
-    // Configure EAS build settings
-    [withConfig, { targetName, bundleIdentifier, groupIdentifier: props?.groupIdentifier }],
-    // Add Podfile target for widget extension
-    [withPodfile, { targetName }],
-  ])
+  // Apply iOS configuration (files, xcode, podfile, plist, eas)
+  config = withIOS(config, {
+    targetName,
+    bundleIdentifier,
+    deploymentTarget,
+    widgets: props?.widgets,
+    groupIdentifier: props?.groupIdentifier,
+  })
 
+  // Optionally enable push notifications
   if (props?.enablePushNotifications) {
     config = withPushNotifications(config)
   }
@@ -78,3 +57,6 @@ const withVoltra: VoltraConfigPlugin = (config, props) => {
 }
 
 export default withVoltra
+
+// Re-export public types
+export type { ConfigPluginProps, VoltraConfigPlugin, WidgetConfig, WidgetFamily } from './types'

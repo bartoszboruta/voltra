@@ -1,0 +1,71 @@
+import * as fs from 'fs'
+import * as path from 'path'
+
+import type { WidgetFiles } from '../types'
+import { logger } from './logger'
+
+/**
+ * Scans the widget extension target directory and returns categorized file lists.
+ *
+ * This function only reads the directory structure - it does NOT copy or create files.
+ * File generation should be done before this is called.
+ *
+ * @param targetPath - Path to the widget extension target directory
+ * @param targetName - Name of the target (for entitlements file)
+ * @returns Categorized lists of files for Xcode project configuration
+ */
+export function getWidgetFiles(targetPath: string, targetName: string): WidgetFiles {
+  const widgetFiles: WidgetFiles = {
+    swiftFiles: [],
+    entitlementFiles: [],
+    plistFiles: [],
+    assetDirectories: [],
+    intentFiles: [],
+  }
+
+  if (!fs.existsSync(targetPath)) {
+    logger.warn(`Widget target directory does not exist: ${targetPath}`)
+    return widgetFiles
+  }
+
+  const files = fs.readdirSync(targetPath)
+
+  for (const file of files) {
+    const itemPath = path.join(targetPath, file)
+    const isDirectory = fs.lstatSync(itemPath).isDirectory()
+
+    // Handle directories (Assets.xcassets)
+    if (isDirectory) {
+      if (file === 'Assets.xcassets') {
+        widgetFiles.assetDirectories.push(file)
+      }
+      continue
+    }
+
+    // Categorize files by extension
+    const ext = path.extname(file).toLowerCase()
+
+    switch (ext) {
+      case '.swift':
+        widgetFiles.swiftFiles.push(file)
+        break
+      case '.entitlements':
+        widgetFiles.entitlementFiles.push(file)
+        break
+      case '.plist':
+        widgetFiles.plistFiles.push(file)
+        break
+      case '.intentdefinition':
+        widgetFiles.intentFiles.push(file)
+        break
+    }
+  }
+
+  // Always include the target entitlements file
+  const targetEntitlements = `${targetName}.entitlements`
+  if (!widgetFiles.entitlementFiles.includes(targetEntitlements)) {
+    widgetFiles.entitlementFiles.push(targetEntitlements)
+  }
+
+  return widgetFiles
+}
