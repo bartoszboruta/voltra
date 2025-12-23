@@ -9,15 +9,13 @@ import { logger } from '../../../utils'
  */
 export function addApplicationGroupsEntitlement(
   entitlements: Record<string, any>,
-  groupIdentifier?: string
+  groupIdentifier: string
 ): Record<string, any> {
-  if (groupIdentifier) {
-    const existingApplicationGroups = (
-      (entitlements['com.apple.security.application-groups'] as string[]) ?? []
-    ).filter(Boolean)
+  const existingApplicationGroups = (
+    (entitlements['com.apple.security.application-groups'] as string[]) ?? []
+  ).filter(Boolean)
 
-    entitlements['com.apple.security.application-groups'] = [groupIdentifier, ...existingApplicationGroups]
-  }
+  entitlements['com.apple.security.application-groups'] = [groupIdentifier, ...existingApplicationGroups]
 
   return entitlements
 }
@@ -25,7 +23,7 @@ export function addApplicationGroupsEntitlement(
 /**
  * Gets the entitlements for the widget extension.
  */
-export function getWidgetExtensionEntitlements(groupIdentifier?: string): Record<string, any> {
+export function getWidgetExtensionEntitlements(groupIdentifier: string): Record<string, any> {
   const entitlements: Record<string, any> = {}
   addApplicationGroupsEntitlement(entitlements, groupIdentifier)
   return entitlements
@@ -34,7 +32,7 @@ export function getWidgetExtensionEntitlements(groupIdentifier?: string): Record
 export interface GenerateEntitlementsOptions {
   targetPath: string
   targetName: string
-  groupIdentifier?: string
+  groupIdentifier: string
 }
 
 /**

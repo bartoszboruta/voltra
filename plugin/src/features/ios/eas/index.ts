@@ -5,7 +5,7 @@ import { addApplicationGroupsEntitlement, getWidgetExtensionEntitlements } from 
 export interface ConfigureEasBuildProps {
   bundleIdentifier: string
   targetName: string
-  groupIdentifier?: string
+  groupIdentifier: string
 }
 
 /**

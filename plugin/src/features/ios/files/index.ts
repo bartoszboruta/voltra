@@ -11,7 +11,7 @@ import { generateSwiftFiles } from './swift'
 export interface GenerateWidgetExtensionFilesProps {
   targetName: string
   widgets?: WidgetConfig[]
-  groupIdentifier?: string
+  groupIdentifier: string
 }
 
 /**
