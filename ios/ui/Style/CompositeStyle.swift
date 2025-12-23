@@ -1,31 +1,28 @@
 import SwiftUI
 
 struct CompositeStyleModifier: ViewModifier {
-    let layout: LayoutStyle
-    let decoration: DecorationStyle
-    let rendering: RenderingStyle
-    
-    func body(content: Content) -> some View {
-        content
-            // 1. Apply Layout (Inner Padding & Size)
-            .modifier(LayoutModifier(style: layout))
-            
-            // 2. Apply Decoration (Background, Border, Shadow)
-            .modifier(DecorationModifier(style: decoration))
+  let layout: LayoutStyle
+  let decoration: DecorationStyle
+  let rendering: RenderingStyle
 
-            // 3. Apply Rendering (Opacity)
-            .modifier(RenderingModifier(style: rendering))
-            
-            // 4. Apply Outer Margin (Must happen last!)
-            .voltraIfLet(layout.margin) { content, margin in
-                content.background(.clear).padding(margin)
-            }
+  func body(content: Content) -> some View {
+    content
+      // 1. Apply Layout (Inner Padding & Size)
+      .modifier(LayoutModifier(style: layout))
+      // 2. Apply Decoration (Background, Border, Shadow)
+      .modifier(DecorationModifier(style: decoration))
+      // 3. Apply Rendering (Opacity)
+      .modifier(RenderingModifier(style: rendering))
+      // 4. Apply Outer Margin (Must happen last!)
+      .voltraIfLet(layout.margin) { content, margin in
+        content.background(.clear).padding(margin)
+      }
 
-            .voltraIfLet(layout.position) { content, position in
-                content.position(x: position.x, y: position.y)
-            }
-            .voltraIfLet(layout.zIndex) { content, zIndex in
-                content.zIndex(zIndex)
-            }
-    }
+      .voltraIfLet(layout.position) { content, position in
+        content.position(x: position.x, y: position.y)
+      }
+      .voltraIfLet(layout.zIndex) { content, zIndex in
+        content.zIndex(zIndex)
+      }
+  }
 }

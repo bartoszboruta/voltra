@@ -9,6 +9,4 @@ import Foundation
 
 /// Parameters for Picker component
 /// Picker control
-public struct PickerParameters: ComponentParameters {
-
-}
+public struct PickerParameters: ComponentParameters {}

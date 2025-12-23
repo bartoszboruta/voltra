@@ -9,6 +9,4 @@ import Foundation
 
 /// Parameters for NavigationView component
 /// Navigation container
-public struct NavigationViewParameters: ComponentParameters {
-
-}
+public struct NavigationViewParameters: ComponentParameters {}

@@ -9,6 +9,4 @@ import Foundation
 
 /// Parameters for List component
 /// List container
-public struct ListParameters: ComponentParameters {
-
-}
+public struct ListParameters: ComponentParameters {}

@@ -27,7 +27,7 @@ public struct VoltraAttributes: ActivityAttributes {
 
       // Decompress and parse once
       let decompressedJson = try BrotliCompression.decompress(base64String: uiJsonData)
-      self.payload = try VoltraLiveActivityPayload(jsonString: decompressedJson)
+      payload = try VoltraLiveActivityPayload(jsonString: decompressedJson)
     }
 
     // MARK: - Convenience Accessors
@@ -56,4 +56,3 @@ public struct VoltraAttributes: ActivityAttributes {
   var name: String
   var deepLinkUrl: String?
 }
-

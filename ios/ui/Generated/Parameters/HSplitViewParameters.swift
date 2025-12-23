@@ -9,6 +9,4 @@ import Foundation
 
 /// Parameters for HSplitView component
 /// Horizontal split view
-public struct HSplitViewParameters: ComponentParameters {
-
-}
+public struct HSplitViewParameters: ComponentParameters {}

@@ -9,6 +9,4 @@ import Foundation
 
 /// Parameters for VSplitView component
 /// Vertical split view
-public struct VSplitViewParameters: ComponentParameters {
-
-}
+public struct VSplitViewParameters: ComponentParameters {}

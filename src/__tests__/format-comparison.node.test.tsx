@@ -23,7 +23,10 @@ describe('Format comparison (JSON vs MessagePack)', () => {
     console.log(`JSON:        ${jsonBytes.length} bytes`)
     console.log(`MessagePack: ${msgpackBytes.length} bytes`)
     console.log(
-      `Difference:  ${msgpackBytes.length - jsonBytes.length} bytes (${((msgpackBytes.length / jsonBytes.length - 1) * 100).toFixed(1)}%)`
+      `Difference:  ${msgpackBytes.length - jsonBytes.length} bytes (${(
+        (msgpackBytes.length / jsonBytes.length - 1) *
+        100
+      ).toFixed(1)}%)`
     )
 
     // Stage 2: After Brotli compression
@@ -39,7 +42,10 @@ describe('Format comparison (JSON vs MessagePack)', () => {
     console.log(`JSON:        ${jsonCompressed.length} bytes`)
     console.log(`MessagePack: ${msgpackCompressed.length} bytes`)
     console.log(
-      `Difference:  ${msgpackCompressed.length - jsonCompressed.length} bytes (${((msgpackCompressed.length / jsonCompressed.length - 1) * 100).toFixed(1)}%)`
+      `Difference:  ${msgpackCompressed.length - jsonCompressed.length} bytes (${(
+        (msgpackCompressed.length / jsonCompressed.length - 1) *
+        100
+      ).toFixed(1)}%)`
     )
 
     // Stage 3: After Base64 encoding
@@ -50,7 +56,10 @@ describe('Format comparison (JSON vs MessagePack)', () => {
     console.log(`JSON:        ${jsonBase64.length} chars`)
     console.log(`MessagePack: ${msgpackBase64.length} chars`)
     console.log(
-      `Difference:  ${msgpackBase64.length - jsonBase64.length} chars (${((msgpackBase64.length / jsonBase64.length - 1) * 100).toFixed(1)}%)`
+      `Difference:  ${msgpackBase64.length - jsonBase64.length} chars (${(
+        (msgpackBase64.length / jsonBase64.length - 1) *
+        100
+      ).toFixed(1)}%)`
     )
 
     // Show the raw data for inspection

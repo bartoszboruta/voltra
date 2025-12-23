@@ -5,9 +5,9 @@
 //  Widget definitions are generated dynamically by the config plugin.
 //
 
+import Foundation
 import SwiftUI
 import WidgetKit
-import Foundation
 
 // MARK: - Shared storage helpers
 
@@ -16,7 +16,8 @@ public enum VoltraHomeWidgetStore {
     // Try runtime UserDefaults (from updateWidget calls)
     if let group = VoltraConfig.groupIdentifier(),
        let defaults = UserDefaults(suiteName: group),
-       let jsonString = defaults.string(forKey: "Voltra_Widget_JSON_\(widgetId)") {
+       let jsonString = defaults.string(forKey: "Voltra_Widget_JSON_\(widgetId)")
+    {
       return jsonString.data(using: .utf8)
     }
 
@@ -36,7 +37,7 @@ public struct VoltraHomeWidgetEntry: TimelineEntry {
   public let date: Date
   public let json: Data?
   public let widgetId: String
-  
+
   public init(date: Date, json: Data?, widgetId: String) {
     self.date = date
     self.json = json
@@ -53,16 +54,16 @@ public struct VoltraHomeWidgetProvider: TimelineProvider {
     self.initialState = initialState
   }
 
-  public func placeholder(in context: Context) -> VoltraHomeWidgetEntry {
+  public func placeholder(in _: Context) -> VoltraHomeWidgetEntry {
     VoltraHomeWidgetEntry(date: Date(), json: nil, widgetId: widgetId)
   }
 
-  public func getSnapshot(in context: Context, completion: @escaping (VoltraHomeWidgetEntry) -> Void) {
+  public func getSnapshot(in _: Context, completion: @escaping (VoltraHomeWidgetEntry) -> Void) {
     let data = VoltraHomeWidgetStore.readJson(widgetId: widgetId) ?? initialState
     completion(VoltraHomeWidgetEntry(date: Date(), json: data, widgetId: widgetId))
   }
 
-  public func getTimeline(in context: Context, completion: @escaping (Timeline<VoltraHomeWidgetEntry>) -> Void) {
+  public func getTimeline(in _: Context, completion: @escaping (Timeline<VoltraHomeWidgetEntry>) -> Void) {
     let data = VoltraHomeWidgetStore.readJson(widgetId: widgetId) ?? initialState
     let entry = VoltraHomeWidgetEntry(date: Date(), json: data, widgetId: widgetId)
     completion(Timeline(entries: [entry], policy: .never))
@@ -72,7 +73,7 @@ public struct VoltraHomeWidgetProvider: TimelineProvider {
 public struct VoltraHomeWidgetView: View {
   public var entry: VoltraHomeWidgetEntry
   @Environment(\.widgetFamily) var widgetFamily
-  
+
   public init(entry: VoltraHomeWidgetEntry) {
     self.entry = entry
   }
@@ -91,7 +92,7 @@ public struct VoltraHomeWidgetView: View {
   }
 
   @ViewBuilder
-  private func placeholderView(widgetId: String) -> some View {
+  private func placeholderView(widgetId _: String) -> some View {
     VStack(alignment: .leading, spacing: 8) {
       Text("Almost ready")
         .font(.headline)
@@ -111,7 +112,7 @@ public struct VoltraHomeWidgetView: View {
 // MARK: - Family-aware content selection
 
 /// Maps WidgetFamily to the JSON key
-fileprivate func familyToKey(_ family: WidgetFamily) -> String {
+private func familyToKey(_ family: WidgetFamily) -> String {
   switch family {
   case .systemSmall: return "systemSmall"
   case .systemMedium: return "systemMedium"
@@ -126,7 +127,7 @@ fileprivate func familyToKey(_ family: WidgetFamily) -> String {
 
 /// Select content appropriate for the current widget family.
 /// Uses the flat structure like live activities (e.g., "systemSmall", "systemMedium").
-fileprivate func selectContentForFamily(_ data: Data, family: WidgetFamily) -> Data {
+private func selectContentForFamily(_ data: Data, family: WidgetFamily) -> Data {
   guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
     // Not valid JSON, return empty
     return Data("[]".utf8)
@@ -137,7 +138,8 @@ fileprivate func selectContentForFamily(_ data: Data, family: WidgetFamily) -> D
   // Try to get content for the specific family
   if let familyContent = root[familyKey] {
     if JSONSerialization.isValidJSONObject(familyContent),
-       let familyData = try? JSONSerialization.data(withJSONObject: familyContent) {
+       let familyData = try? JSONSerialization.data(withJSONObject: familyContent)
+    {
       return familyData
     }
   }
@@ -148,7 +150,8 @@ fileprivate func selectContentForFamily(_ data: Data, family: WidgetFamily) -> D
   for fallbackKey in fallbackOrder {
     if let fallbackContent = root[fallbackKey] {
       if JSONSerialization.isValidJSONObject(fallbackContent),
-         let fallbackData = try? JSONSerialization.data(withJSONObject: fallbackContent) {
+         let fallbackData = try? JSONSerialization.data(withJSONObject: fallbackContent)
+      {
         return fallbackData
       }
     }
@@ -160,11 +163,12 @@ fileprivate func selectContentForFamily(_ data: Data, family: WidgetFamily) -> D
 
 // MARK: - Deep link + rendering helpers
 
-fileprivate func buildStaticContentView(data: Data, source: String) -> AnyView {
+private func buildStaticContentView(data: Data, source _: String) -> AnyView {
   let normalized = normalizeJsonData(data) ?? (try? JSONSerialization.data(withJSONObject: [])) ?? Data("[]".utf8)
 
   guard let jsonString = String(data: normalized, encoding: .utf8),
-        let json = try? JSONValue.parse(from: jsonString) else {
+        let json = try? JSONValue.parse(from: jsonString)
+  else {
     return AnyView(
       Text("Failed to render widget")
         .font(.caption)
@@ -183,33 +187,34 @@ private extension View {
   @ViewBuilder
   func disableWidgetMarginsIfAvailable() -> some View {
     if #available(iOSApplicationExtension 17.0, *) {
-      self.containerBackground(.clear, for: .widget)
+      containerBackground(.clear, for: .widget)
     } else {
       self
     }
   }
 }
 
-fileprivate func extractRootIdentifier(_ data: Data) -> String? {
+private func extractRootIdentifier(_ data: Data) -> String? {
   guard let jsonString = String(data: data, encoding: .utf8),
-        let json = try? JSONValue.parse(from: jsonString) else {
+        let json = try? JSONValue.parse(from: jsonString)
+  else {
     return nil
   }
 
   let root = VoltraNode.parse(from: json)
-  if case .element(let element) = root {
+  if case let .element(element) = root {
     return element.id ?? element.type
   }
   return nil
 }
 
-fileprivate func makeDeepLinkURL(_ data: Data, source: String, kind: String) -> URL? {
+private func makeDeepLinkURL(_ data: Data, source: String, kind: String) -> URL? {
   guard let scheme = VoltraDeepLinkResolver.deepLinkScheme() else { return nil }
   let tag = extractRootIdentifier(data) ?? "unknown"
   return URL(string: "\(scheme)://voltraui?kind=\(kind)&source=\(source)&tag=\(tag)")
 }
 
-fileprivate func resolveStaticDeepLinkURL(_ data: Data, widgetId: String) -> URL? {
+private func resolveStaticDeepLinkURL(_ data: Data, widgetId: String) -> URL? {
   if let raw = VoltraHomeWidgetStore.readDeepLinkUrl(widgetId: widgetId), !raw.isEmpty {
     if raw.contains("://"), let url = URL(string: raw) { return url }
     if let scheme = VoltraDeepLinkResolver.deepLinkScheme() {
@@ -220,7 +225,7 @@ fileprivate func resolveStaticDeepLinkURL(_ data: Data, widgetId: String) -> URL
   return makeDeepLinkURL(data, source: "home_widget", kind: "widget")
 }
 
-fileprivate func normalizeJsonData(_ data: Data) -> Data? {
+private func normalizeJsonData(_ data: Data) -> Data? {
   guard let obj = try? JSONSerialization.jsonObject(with: data) else { return nil }
 
   // If it's already an array, use it as-is
@@ -231,7 +236,8 @@ fileprivate func normalizeJsonData(_ data: Data) -> Data? {
   // If it's a single component (dictionary), wrap it in an array
   if let dict = obj as? [String: Any] {
     guard JSONSerialization.isValidJSONObject([dict]),
-          let wrapped = try? JSONSerialization.data(withJSONObject: [dict]) else {
+          let wrapped = try? JSONSerialization.data(withJSONObject: [dict])
+    else {
       return nil
     }
     return wrapped
@@ -240,4 +246,3 @@ fileprivate func normalizeJsonData(_ data: Data) -> Data? {
   // Invalid input (string, number, boolean, null) - return nil to indicate error
   return nil
 }
-

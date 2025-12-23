@@ -10,9 +10,9 @@ import Foundation
 /// Parameters for ScrollView component
 /// Scrollable container
 public struct ScrollViewParameters: ComponentParameters {
-    /// Scroll axis
-    public let axis: String?
+  /// Scroll axis
+  public let axis: String?
 
-    /// Show scroll indicators
-    public let showsIndicators: Bool?
+  /// Show scroll indicators
+  public let showsIndicators: Bool?
 }

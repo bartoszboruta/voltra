@@ -130,14 +130,20 @@ const main = () => {
   console.log('✅ Generation complete!\n')
   console.log('Generated files:')
   console.log(
-    `   TypeScript props and components: ${Object.keys(tsJsxResult.props).length + Object.keys(tsJsxResult.jsx).length} files in src/jsx/`
+    `   TypeScript props and components: ${
+      Object.keys(tsJsxResult.props).length + Object.keys(tsJsxResult.jsx).length
+    } files in src/jsx/`
   )
   console.log(`   Swift parameters: ${Object.keys(swiftParameterFiles).length} files in ios/ui/Generated/Parameters/`)
   console.log(
-    `   Component IDs: ${Object.keys(tsComponentIdFiles).length} TypeScript files, ${Object.keys(swiftComponentIdFiles).length} Swift files`
+    `   Component IDs: ${Object.keys(tsComponentIdFiles).length} TypeScript files, ${
+      Object.keys(swiftComponentIdFiles).length
+    } Swift files`
   )
   console.log(
-    `   Short names: ${Object.keys(tsShortNameFiles).length} TypeScript files, ${Object.keys(swiftShortNameFiles).length} Swift files`
+    `   Short names: ${Object.keys(tsShortNameFiles).length} TypeScript files, ${
+      Object.keys(swiftShortNameFiles).length
+    } Swift files`
   )
   console.log()
   console.log('Next steps:')

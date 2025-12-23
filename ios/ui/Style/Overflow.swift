@@ -1,4 +1,4 @@
 enum Overflow {
-    case visible
-    case hidden
+  case visible
+  case hidden
 }

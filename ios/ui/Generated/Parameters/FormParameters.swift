@@ -9,6 +9,4 @@ import Foundation
 
 /// Parameters for Form component
 /// Form container
-public struct FormParameters: ComponentParameters {
-
-}
+public struct FormParameters: ComponentParameters {}

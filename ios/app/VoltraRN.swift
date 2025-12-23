@@ -60,6 +60,6 @@ class VoltraRN: ExpoView {
     newHostingController.view.frame = bounds
     addSubview(newHostingController.view)
 
-    self.hostingController = newHostingController
+    hostingController = newHostingController
   }
 }

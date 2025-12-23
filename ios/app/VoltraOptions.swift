@@ -20,15 +20,15 @@ public struct StartVoltraOptions: Record {
   /// Allows you to rebind to the same activity on app restart.
   @Field
   public var activityName: String?
-  
+
   /// URL to open when the Live Activity is tapped.
   @Field
   public var deepLinkUrl: String?
-  
+
   /// Unix timestamp in milliseconds
   @Field
   public var staleDate: Double?
-  
+
   /// Double value between 0.0 and 1.0, defaults to 0.0
   @Field
   public var relevanceScore: Double?
@@ -50,7 +50,7 @@ public struct EndVoltraOptions: Record {
 /// Dismissal policy options
 public struct DismissalPolicyOptions: Record {
   @Field
-  public var type: String  // "immediate" or "after"
+  public var type: String // "immediate" or "after"
 
   @Field
   public var date: Double? // timestamp for after
@@ -72,19 +72,19 @@ public struct PreloadImageOptions: Record {
   /// The URL to download the image from
   @Field
   public var url: String
-  
+
   /// The key to use when referencing this image (used as assetName)
   @Field
   public var key: String
-  
+
   /// HTTP method to use (GET, POST, PUT). Defaults to GET.
   @Field
   public var method: String?
-  
+
   /// Optional HTTP headers to include in the request
   @Field
   public var headers: [String: String]?
-  
+
   public init() {}
 }
 
@@ -92,12 +92,12 @@ public struct PreloadImageOptions: Record {
 public struct PreloadImageFailure: Record {
   @Field
   public var key: String
-  
+
   @Field
   public var error: String
-  
+
   public init() {}
-  
+
   public init(key: String, error: String) {
     self.key = key
     self.error = error
@@ -108,15 +108,14 @@ public struct PreloadImageFailure: Record {
 public struct PreloadImagesResult: Record {
   @Field
   public var succeeded: [String]
-  
+
   @Field
   public var failed: [PreloadImageFailure]
-  
+
   public init() {}
-  
+
   public init(succeeded: [String], failed: [PreloadImageFailure]) {
     self.succeeded = succeeded
     self.failed = failed
   }
 }
-
