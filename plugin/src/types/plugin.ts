@@ -19,6 +19,11 @@ export interface ConfigPluginProps {
    * Each widget will be available in the widget gallery
    */
   widgets?: WidgetConfig[]
+  /**
+   * iOS deployment target version for the widget extension
+   * If not provided, will use the main app's deployment target or fall back to the default
+   */
+  deploymentTarget?: string
 }
 
 /**
