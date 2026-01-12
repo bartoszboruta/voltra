@@ -21,8 +21,8 @@ A vertical stack container that arranges its children in a column.
 
 - `spacing` (number, optional): Spacing between children in points
 - `alignment` (string, optional): Horizontal alignment of children:
-  - `"leading"` (default) - Align to left edge
-  - `"center"` - Align to center
+  - `"leading"` - Align to left edge
+  - `"center"` (default) - Align to center
   - `"trailing"` - Align to right edge
 
 **Apple Documentation:** [VStack](https://developer.apple.com/documentation/swiftui/vstack)
