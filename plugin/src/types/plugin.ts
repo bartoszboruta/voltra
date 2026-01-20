@@ -30,6 +30,15 @@ export interface ConfigPluginProps {
    * Useful for matching existing provisioning profiles or credentials
    */
   targetName?: string
+  /**
+   * Custom fonts to include in the Live Activity extension.
+   * Provide an array of font file paths or directories containing fonts.
+   * Supports .ttf, .otf, .woff, and .woff2 formats.
+   *
+   * This is equivalent to expo-font but for the Live Activity extension.
+   * @see https://docs.expo.dev/versions/latest/sdk/font/
+   */
+  fonts?: string[]
 }
 
 /**
@@ -48,4 +57,5 @@ export interface IOSPluginProps {
   groupIdentifier?: string
   projectRoot: string
   platformProjectRoot: string
+  fonts?: string[]
 }

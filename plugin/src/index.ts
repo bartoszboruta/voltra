@@ -49,6 +49,7 @@ const withVoltra: VoltraConfigPlugin = (config, props = {}) => {
     deploymentTarget,
     widgets: props?.widgets,
     ...(props?.groupIdentifier ? { groupIdentifier: props.groupIdentifier } : {}),
+    ...(props?.fonts ? { fonts: props.fonts } : {}),
   })
 
   // Optionally enable push notifications

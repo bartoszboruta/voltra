@@ -43,6 +43,7 @@ public enum ShortNames {
     "fg": "flexGrow",
     "fgw": "flexGrowWidth",
     "fnt": "font",
+    "ff": "fontFamily",
     "fs": "fontSize",
     "fvar": "fontVariant",
     "fw": "fontWeight",
