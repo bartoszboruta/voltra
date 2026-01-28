@@ -1,6 +1,7 @@
 import { IOSConfig } from 'expo/config-plugins'
 
 import { IOS } from './constants'
+import { withAndroid } from './features/android'
 import { withIOS } from './features/ios'
 import { withPushNotifications } from './features/pushNotifications'
 import type { VoltraConfigPlugin } from './types'
@@ -12,7 +13,7 @@ import { validateProps } from './validation'
  *
  * This plugin configures your Expo app for:
  * - Live Activities (Dynamic Island + Lock Screen)
- * - Home Screen Widgets
+ * - Home Screen Widgets (iOS and Android)
  * - Push Notifications for Live Activities (optional)
  */
 const withVoltra: VoltraConfigPlugin = (config, props = {}) => {
@@ -52,6 +53,13 @@ const withVoltra: VoltraConfigPlugin = (config, props = {}) => {
     ...(props?.fonts ? { fonts: props.fonts } : {}),
   })
 
+  // Apply Android configuration (files, manifest)
+  if (props.android) {
+    config = withAndroid(config, {
+      widgets: props.android.widgets ?? [],
+    })
+  }
+
   // Optionally enable push notifications
   if (props.enablePushNotifications) {
     config = withPushNotifications(config)
@@ -63,4 +71,11 @@ const withVoltra: VoltraConfigPlugin = (config, props = {}) => {
 export default withVoltra
 
 // Re-export public types
-export type { ConfigPluginProps, VoltraConfigPlugin, WidgetConfig, WidgetFamily } from './types'
+export type {
+  AndroidPluginConfig,
+  AndroidWidgetConfig,
+  ConfigPluginProps,
+  VoltraConfigPlugin,
+  WidgetConfig,
+  WidgetFamily,
+} from './types'

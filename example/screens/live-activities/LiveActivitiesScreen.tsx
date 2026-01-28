@@ -1,7 +1,6 @@
 import { Link } from 'expo-router'
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { endAllLiveActivities } from 'voltra/client'
 
 import { Button } from '~/components/Button'
@@ -62,8 +61,6 @@ const CARD_ORDER: ActivityKey[] = [
 ]
 
 export default function LiveActivitiesScreen() {
-  const insets = useSafeAreaInsets()
-
   const [activeMap, setActiveMap] = useState<Record<ActivityKey, boolean>>({
     basic: false,
     stylesheet: false,
@@ -74,6 +71,7 @@ export default function LiveActivitiesScreen() {
     supplementalFamilies: false,
   })
 
+  const androidBasicRef = useRef<LiveActivityExampleComponentRef>(null)
   const basicRef = useRef<LiveActivityExampleComponentRef>(null)
   const stylesheetRef = useRef<LiveActivityExampleComponentRef>(null)
   const glassRef = useRef<LiveActivityExampleComponentRef>(null)
@@ -84,6 +82,7 @@ export default function LiveActivitiesScreen() {
 
   const activityRefs = useMemo(
     () => ({
+      'android-basic': androidBasicRef,
       basic: basicRef,
       stylesheet: stylesheetRef,
       glass: glassRef,
@@ -175,10 +174,7 @@ export default function LiveActivitiesScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={[styles.scrollView]}
-        contentContainerStyle={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-      >
+      <ScrollView style={[styles.scrollView]} contentContainerStyle={styles.content}>
         <Text style={styles.heading}>Voltra</Text>
         <Text style={styles.subheading}>
           Voltra is a library that lets you build custom Live Activities and Dynamic Island layouts using React Native -

@@ -1,4 +1,5 @@
 import type { ConfigPluginProps } from '../types'
+import { validateAndroidWidgetConfig } from './validateAndroidWidget'
 import { validateWidgetConfig } from './validateWidget'
 
 /**
@@ -17,7 +18,7 @@ export function validateProps(props: ConfigPluginProps): void {
     }
   }
 
-  // Validate widgets if provided
+  // Validate iOS widgets if provided
   if (props.widgets !== undefined) {
     if (!Array.isArray(props.widgets)) {
       throw new Error('widgets must be an array')
@@ -32,6 +33,30 @@ export function validateProps(props: ConfigPluginProps): void {
         throw new Error(`Duplicate widget ID: '${widget.id}'`)
       }
       seenIds.add(widget.id)
+    }
+  }
+
+  // Validate Android configuration if provided
+  if (props.android !== undefined) {
+    if (typeof props.android !== 'object' || props.android === null) {
+      throw new Error('android configuration must be an object')
+    }
+
+    if (props.android.widgets !== undefined) {
+      if (!Array.isArray(props.android.widgets)) {
+        throw new Error('android.widgets must be an array')
+      }
+
+      // Check for duplicate widget IDs
+      const seenIds = new Set<string>()
+      for (const widget of props.android.widgets) {
+        validateAndroidWidgetConfig(widget)
+
+        if (seenIds.has(widget.id)) {
+          throw new Error(`Duplicate Android widget ID: '${widget.id}'`)
+        }
+        seenIds.add(widget.id)
+      }
     }
   }
 }
