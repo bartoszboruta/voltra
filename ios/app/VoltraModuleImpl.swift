@@ -249,7 +249,45 @@ public class VoltraModuleImpl {
     print("[Voltra] Cleared all widgets")
   }
 
+  func getActiveWidgets() async throws -> [[String: String]] {
+    try await withCheckedThrowingContinuation { continuation in
+      WidgetCenter.shared.getCurrentConfigurations { result in
+        switch result {
+        case let .success(widgetInfos):
+          let mapped = widgetInfos.map { widget -> [String: String] in
+            let prefix = "Voltra_Widget_"
+            let name = widget.kind.hasPrefix(prefix)
+              ? String(widget.kind.dropFirst(prefix.count))
+              : widget.kind
+
+            return [
+              "name": name,
+              "kind": widget.kind,
+              "family": self.mapWidgetFamily(widget.family),
+            ]
+          }
+          continuation.resume(returning: mapped)
+        case let .failure(error):
+          continuation.resume(throwing: error)
+        }
+      }
+    }
+  }
+
   // MARK: - Private Helpers
+
+  private func mapWidgetFamily(_ family: WidgetFamily) -> String {
+    switch family {
+    case .systemSmall: return "systemSmall"
+    case .systemMedium: return "systemMedium"
+    case .systemLarge: return "systemLarge"
+    case .systemExtraLarge: return "systemExtraLarge"
+    case .accessoryCircular: return "accessoryCircular"
+    case .accessoryRectangular: return "accessoryRectangular"
+    case .accessoryInline: return "accessoryInline"
+    @unknown default: return "unknown"
+    }
+  }
 
   private func mapError(_ error: Error) -> Error {
     if let serviceError = error as? VoltraLiveActivityError {

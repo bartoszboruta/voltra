@@ -18,6 +18,23 @@ export type AndroidWidgetSizeVariant = {
 }
 
 /**
+ * Information about an active widget instance on Android
+ */
+export type WidgetInfo = {
+  /** The name (ID) of the widget as defined in the config plugin */
+  name: string
+  /** The unique ID for this widget instance (required for updates) */
+  widgetId: number
+  /** The class name of the provider (e.g., ".WeatherWidget") */
+  providerClassName: string
+  /** Current labeling associated with the widget */
+  label: string
+  /** Dimensions in dp as reported by the system */
+  width: number
+  height: number
+}
+
+/**
  * Widget variants using size-based breakpoints.
  * Android picks the best matching variant based on widget dimensions.
  *
