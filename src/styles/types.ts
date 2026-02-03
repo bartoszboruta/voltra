@@ -47,7 +47,7 @@ export type VoltraViewStyle = Pick<
 export type VoltraTextStyle = VoltraViewStyle &
   Pick<
     RNTextStyle,
-    'fontSize'
+    | 'fontSize'
     | 'fontWeight'
     | 'fontFamily'
     | 'color'
