@@ -47,10 +47,7 @@ export const configureXcodeProject: ConfigPlugin<ConfigureXcodeProjectProps> = (
     const targetPath = path.join(platformProjectRoot, targetName)
     const widgetFiles = getWidgetFiles(targetPath, targetName)
 
-    const currentProjectVersion = config.ios?.buildNumber || '1'
-    const marketingVersion = config.version
-
-    // Read main app target settings to synchronize code signing (but not deployment target)
+    // Read main app target settings to synchronize code signing
     const mainAppSettings = getMainAppTargetSettings(xcodeProject)
 
     // Use the deploymentTarget from plugin config (or default), ignore main app's deployment target
@@ -62,10 +59,8 @@ export const configureXcodeProject: ConfigPlugin<ConfigureXcodeProjectProps> = (
         xcodeProject,
         {
           targetName,
-          currentProjectVersion,
           bundleIdentifier,
           deploymentTarget,
-          marketingVersion,
           codeSignStyle: mainAppSettings?.codeSignStyle,
           developmentTeam: mainAppSettings?.developmentTeam,
           provisioningProfileSpecifier: mainAppSettings?.provisioningProfileSpecifier,
@@ -114,10 +109,8 @@ export const configureXcodeProject: ConfigPlugin<ConfigureXcodeProjectProps> = (
 
     const xCConfigurationList = addXCConfigurationList(xcodeProject, {
       targetName,
-      currentProjectVersion,
       bundleIdentifier,
       deploymentTarget,
-      marketingVersion,
       codeSignStyle: mainAppSettings?.codeSignStyle,
       developmentTeam: mainAppSettings?.developmentTeam,
       provisioningProfileSpecifier: mainAppSettings?.provisioningProfileSpecifier,

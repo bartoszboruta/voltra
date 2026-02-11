@@ -28,6 +28,10 @@ const withVoltra: VoltraConfigPlugin = (config, props = {}) => {
     const targetName = props.targetName || `${IOSConfig.XcodeUtils.sanitizedName(config.name)}LiveActivity`
     const bundleIdentifier = `${config.ios.bundleIdentifier}.${targetName}`
 
+    // Extract version and buildNumber from config, defaulting to Expo defaults
+    const version = config.version || '1.0.0'
+    const buildNumber = config.ios?.buildNumber || '1'
+
     // Ensure URL scheme is set for widget deep linking
     config = ensureURLScheme(config)
 
@@ -43,6 +47,8 @@ const withVoltra: VoltraConfigPlugin = (config, props = {}) => {
       bundleIdentifier,
       deploymentTarget,
       widgets: props?.widgets,
+      version,
+      buildNumber,
       ...(props?.groupIdentifier ? { groupIdentifier: props.groupIdentifier } : {}),
       ...(props?.fonts ? { fonts: props.fonts } : {}),
     })

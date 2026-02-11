@@ -4,10 +4,8 @@ import { IOS } from '../../constants'
 
 export interface AddConfigurationListOptions {
   targetName: string
-  currentProjectVersion: string
   bundleIdentifier: string
   deploymentTarget: string
-  marketingVersion?: string
   codeSignStyle?: string
   developmentTeam?: string
   provisioningProfileSpecifier?: string
@@ -16,10 +14,8 @@ export interface AddConfigurationListOptions {
 function createCommonBuildSettings(options: AddConfigurationListOptions) {
   const {
     targetName,
-    currentProjectVersion,
     bundleIdentifier,
     deploymentTarget,
-    marketingVersion,
     codeSignStyle,
     developmentTeam,
     provisioningProfileSpecifier,
@@ -31,20 +27,14 @@ function createCommonBuildSettings(options: AddConfigurationListOptions) {
     TARGETED_DEVICE_FAMILY: `"${IOS.DEVICE_FAMILY}"`,
     INFOPLIST_FILE: `${targetName}/Info.plist`,
     INFOPLIST_OUTPUT_FORMAT: `"xml"`,
-    CURRENT_PROJECT_VERSION: `"${currentProjectVersion}"`,
+    CURRENT_PROJECT_VERSION: `"1"`,
+    MARKETING_VERSION: `"1.0"`,
     IPHONEOS_DEPLOYMENT_TARGET: `"${deploymentTarget}"`,
     PRODUCT_BUNDLE_IDENTIFIER: `"${bundleIdentifier}"`,
-    GENERATE_INFOPLIST_FILE: `"YES"`,
-    INFOPLIST_KEY_CFBundleDisplayName: targetName,
-    INFOPLIST_KEY_NSHumanReadableCopyright: `""`,
     SWIFT_OPTIMIZATION_LEVEL: `"-Onone"`,
     CODE_SIGN_ENTITLEMENTS: `"${targetName}/${targetName}.entitlements"`,
     APPLICATION_EXTENSION_API_ONLY: '"YES"',
     ASSETCATALOG_COMPILER_APPICON_NAME: '""',
-  }
-
-  if (marketingVersion) {
-    commonBuildSettings.MARKETING_VERSION = `"${marketingVersion}"`
   }
 
   // Synchronize code signing settings from main app target

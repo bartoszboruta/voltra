@@ -8,7 +8,7 @@ export interface MainAppTargetSettings {
 }
 
 /**
- * Reads build settings from the main app target to synchronize with the widget extension.
+ * Reads build settings from the main app target to synchronize code signing with the widget extension.
  *
  * @param xcodeProject The Xcode project instance
  * @returns The main app target's build settings, or null if not found

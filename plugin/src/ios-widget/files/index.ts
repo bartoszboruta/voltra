@@ -12,6 +12,8 @@ export interface GenerateWidgetExtensionFilesProps {
   targetName: string
   widgets?: WidgetConfig[]
   groupIdentifier?: string
+  version: string
+  buildNumber: string
 }
 
 /**
@@ -27,7 +29,7 @@ export interface GenerateWidgetExtensionFilesProps {
  * This should run before configureXcodeProject so the files exist when Xcode project is configured.
  */
 export const generateWidgetExtensionFiles: ConfigPlugin<GenerateWidgetExtensionFilesProps> = (config, props) => {
-  const { targetName, widgets, groupIdentifier } = props
+  const { targetName, widgets, groupIdentifier, version, buildNumber } = props
 
   return withDangerousMod(config, [
     'ios',
@@ -45,7 +47,7 @@ export const generateWidgetExtensionFiles: ConfigPlugin<GenerateWidgetExtensionF
       }
 
       // Generate Info.plist
-      generateInfoPlist(targetPath)
+      generateInfoPlist(targetPath, targetName, version, buildNumber)
 
       // Generate Assets.xcassets and copy user images
       generateAssets({ targetPath })
