@@ -12,22 +12,90 @@ struct DecorationStyle {
 struct DecorationModifier: ViewModifier {
   let style: DecorationStyle
 
+  private var hasActiveGlassEffect: Bool {
+    guard let glassEffect = style.glassEffect else { return false }
+    switch glassEffect {
+    case .none:
+      return false
+    default:
+      return true
+    }
+  }
+
+  @ViewBuilder
+  private func applyGlassEffect<Content: View>(
+    to content: Content,
+    glassEffect: GlassEffect,
+    cornerRadius: CGFloat?
+  ) -> some View {
+    if #available(iOS 26.0, *) {
+      switch glassEffect {
+      case .clear:
+        content.background {
+          if let cornerRadius {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+              .fill(.clear)
+              .glassEffect(.clear)
+          } else {
+            Rectangle()
+              .fill(.clear)
+              .glassEffect(.clear)
+          }
+        }
+      case .identity:
+        content.background {
+          if let cornerRadius {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+              .fill(.clear)
+              .glassEffect(.identity)
+          } else {
+            Rectangle()
+              .fill(.clear)
+              .glassEffect(.identity)
+          }
+        }
+      case .regular:
+        content.background {
+          if let cornerRadius {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+              .fill(.clear)
+              .glassEffect(.regular)
+          } else {
+            Rectangle()
+              .fill(.clear)
+              .glassEffect(.regular)
+          }
+        }
+      case .none:
+        content
+      }
+    } else {
+      content
+    }
+  }
+
   func body(content: Content) -> some View {
     content
       .voltraIfLet(style.backgroundColor) { content, color in
         content.background(color)
       }
-      // If we have a corner radius, we must handle the border specifically here
+      // Apply glass before decoration overlays (border/shadow) to avoid
+      // ActivityKit rendering issues where content may disappear.
+      .voltraIfLet(style.glassEffect) { content, glassEffect in
+        applyGlassEffect(to: content, glassEffect: glassEffect, cornerRadius: style.cornerRadius)
+      }
+      // Corner radius/border handling
       .voltraIfLet(style.cornerRadius) { content, radius in
         if let border = style.border {
           content
-            .cornerRadius(radius)
             .overlay(
-              RoundedRectangle(cornerRadius: radius)
+              RoundedRectangle(cornerRadius: radius, style: .continuous)
                 .stroke(border.color, lineWidth: border.width)
             )
-        } else {
+        } else if !hasActiveGlassEffect {
           content.cornerRadius(radius)
+        } else {
+          content
         }
       }
       // Fallback: If there is NO corner radius, but there IS a border
@@ -46,22 +114,6 @@ struct DecorationModifier: ViewModifier {
             x: shadow.offset.width,
             y: shadow.offset.height
           )
-      }
-      .voltraIfLet(style.glassEffect) { content, glassEffect in
-        if #available(iOS 26.0, *) {
-          switch glassEffect {
-          case .clear:
-            content.glassEffect(.clear)
-          case .identity:
-            content.glassEffect(.identity)
-          case .regular:
-            content.glassEffect(.regular)
-          case .none:
-            content
-          }
-        } else {
-          content
-        }
       }
   }
 }

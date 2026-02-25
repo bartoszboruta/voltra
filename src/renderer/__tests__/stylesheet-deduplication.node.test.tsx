@@ -153,4 +153,13 @@ describe('Stylesheet Deduplication', () => {
 
     expect(result.s).toBeInstanceOf(Array)
   })
+
+  test('8. glassEffect uses shortname mapping', () => {
+    const renderer = createVoltraRenderer()
+    renderer.addRootNode('root', <Text style={{ glassEffect: 'regular' }}>A</Text>)
+    const result = renderer.render()
+
+    expect(result.s).toHaveLength(1)
+    expect((result.s?.[0] as any).ge).toBe('regular')
+  })
 })

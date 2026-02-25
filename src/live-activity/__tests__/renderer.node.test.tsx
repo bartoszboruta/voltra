@@ -123,4 +123,15 @@ describe('Live Activity Renderer', () => {
     expect(output).toHaveProperty('isl_exp_c')
     expect(output).toHaveProperty('isl_min')
   })
+
+  test('8. clear activityBackgroundTint is preserved', () => {
+    const output = renderLiveActivityToJson({
+      lockScreen: {
+        content: <Text>X</Text>,
+        activityBackgroundTint: 'clear',
+      },
+    })
+
+    expect((output as any).ls_background_tint).toBe('clear')
+  })
 })

@@ -102,6 +102,10 @@ enum JSStyleParser {
   }
 
   static func glassEffect(_ value: Any?) -> GlassEffect? {
+    if let bool = value as? Bool {
+      return bool ? .regular : .none
+    }
+
     guard let string = (value as? String)?.lowercased() else { return nil }
 
     switch string {

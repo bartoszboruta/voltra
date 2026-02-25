@@ -18,7 +18,7 @@ export const VoltraLovesLiveActivity = () => {
 export function LiquidGlassLiveActivityUI() {
   return (
     <Voltra.GlassContainer spacing={10}>
-      <Voltra.VStack style={{ padding: 20, borderRadius: 24, glassEffect: 'regular' }}>
+      <Voltra.VStack style={{ padding: 20, borderRadius: 24, glassEffect: 'clear' }}>
         <VoltraLovesLiveActivity />
       </Voltra.VStack>
     </Voltra.GlassContainer>
