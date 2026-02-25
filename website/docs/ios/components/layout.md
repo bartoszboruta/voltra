@@ -199,6 +199,25 @@ A grouped content container that visually groups related content with a styled b
 
 A Liquid Glass container that wraps Apple's [`GlassEffectContainer`](https://developer.apple.com/documentation/swiftui/glasseffectcontainer) to provide a modern glassmorphism effect for grouping content.
 
+
+When building Liquid Glass lock screen UI, use lock screen object form and clear background tint:
+```typescript
+const variants = {
+  lockScreen: {
+    content: (
+      <Voltra.VStack>
+        <Voltra.Text>Your content here</Voltra.Text>
+      </Voltra.VStack>
+    ),
+    activityBackgroundTint: 'clear',
+  },
+}
+```
+
+:::note Liquid Glass
+For Liquid Glass lock screen designs, set `activityBackgroundTint: 'clear'` on `lockScreen` and use string `glassEffect` values, for example `style={{ glassEffect: 'regular' }}`.
+:::
+
 :::warning iOS 26 SDK Required
 This component uses Apple's `GlassEffectContainer` API which requires **Xcode with iOS 26 SDK** to build. If you're using an older Xcode version, you'll encounter build errors:
 
