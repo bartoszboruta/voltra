@@ -51,11 +51,20 @@ if (useManagedAndroidSdkVersions) {
   }
 }
 
+// Read version from package.json for BuildConfig
+def packageJsonFile = new File(project.projectDir.parentFile, "package.json")
+def packageJson = new groovy.json.JsonSlurper().parseText(packageJsonFile.text)
+def voltraVersion = packageJson.version
+
 android {
   namespace "voltra"
   defaultConfig {
     versionCode 1
     versionName "0.1.0"
+    buildConfigField "String", "VOLTRA_VERSION", "\"${voltraVersion}\""
+  }
+  buildFeatures {
+    buildConfig true
   }
   lintOptions {
     abortOnError false
@@ -83,6 +92,15 @@ dependencies {
 
   // Compose runtime (required for Glance)
   api "androidx.compose.runtime:runtime:1.6.8"
+
+  // WorkManager (for periodic server-driven widget updates)
+  api "androidx.work:work-runtime-ktx:2.9.1"
+
+  // DataStore (credential storage for widget server updates)
+  api "androidx.datastore:datastore-preferences:1.1.4"
+
+  // Google Tink (encryption for credential storage)
+  implementation "com.google.crypto.tink:tink-android:1.19.0"
 
   // JSON parsing
   implementation "com.google.code.gson:gson:2.10.1"

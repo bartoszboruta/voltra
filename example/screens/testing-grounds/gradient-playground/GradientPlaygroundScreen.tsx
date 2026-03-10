@@ -19,7 +19,7 @@ const DIRECTION_LABELS: Record<Direction, string> = {
   'to top right': 'to top right',
 }
 
-const PRESETS: Array<{ label: string; colors: [string, string, ...string[]] }> = [
+const PRESETS: { label: string; colors: [string, string, ...string[]] }[] = [
   { label: 'Sunset', colors: ['#FF6B6B', '#FFD93D'] },
   { label: 'Ocean', colors: ['#0093E9', '#80D0C7'] },
   { label: 'Purple', colors: ['#8B5CF6', '#EC4899'] },

@@ -2,7 +2,6 @@ import { XcodeProject } from '@expo/config-plugins'
 
 import type { WidgetFiles } from '../../types'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const pbxFile = require('xcode/lib/pbxFile')
 
 export interface AddPbxGroupOptions {

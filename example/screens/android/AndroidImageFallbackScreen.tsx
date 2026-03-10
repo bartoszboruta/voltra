@@ -5,13 +5,13 @@ import { requestPinAndroidWidget, updateAndroidWidget } from 'voltra/android/cli
 
 import { Button } from '~/components/Button'
 import { Card } from '~/components/Card'
-import { AndroidImageFallbackWidget } from '~/widgets/AndroidImageFallbackWidget'
+import { AndroidImageFallbackWidget } from '~/widgets/android/AndroidImageFallbackWidget'
 
 const WIDGET_ID = 'image_fallback'
 
 type ExampleType = 'colors' | 'styled' | 'transparent' | 'custom' | 'mixed'
 
-const EXAMPLES: Array<{ id: ExampleType; title: string; description: string }> = [
+const EXAMPLES: { id: ExampleType; title: string; description: string }[] = [
   {
     id: 'colors',
     title: 'Background Colors',

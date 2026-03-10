@@ -6,8 +6,8 @@ import { reloadWidgets, scheduleWidget, updateWidget, VoltraWidgetPreview, Widge
 
 import { Button } from '~/components/Button'
 import { Card } from '~/components/Card'
+import { WeatherWidget } from '~/widgets/ios/IosWeatherWidget'
 import { SAMPLE_WEATHER_DATA, type WeatherCondition, type WeatherData } from '~/widgets/weather-types'
-import { WeatherWidget } from '~/widgets/WeatherWidget'
 
 const WIDGET_FAMILIES: { id: WidgetFamily; title: string; description: string }[] = [
   {

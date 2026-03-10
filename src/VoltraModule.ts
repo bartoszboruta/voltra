@@ -1,6 +1,12 @@
 import { requireNativeModule } from 'expo'
 
-import type { EventSubscription, PreloadImageOptions, PreloadImagesResult, UpdateWidgetOptions } from './types.js'
+import type {
+  EventSubscription,
+  PreloadImageOptions,
+  PreloadImagesResult,
+  UpdateWidgetOptions,
+  WidgetServerCredentials,
+} from './types.js'
 
 /**
  * Options for starting a Live Activity
@@ -207,6 +213,17 @@ export interface VoltraModuleSpec {
    * Fetches all active widget configurations/instances
    */
   getActiveWidgets<T = any>(): Promise<T[]>
+
+  /**
+   * Set server credentials for widget server-driven updates.
+   * Stored securely in Keychain (iOS) or encrypted DataStore via Tink (Android).
+   */
+  setWidgetServerCredentials(credentials: WidgetServerCredentials): Promise<void>
+
+  /**
+   * Clear server credentials for widget server-driven updates.
+   */
+  clearWidgetServerCredentials(): Promise<void>
 
   /**
    * Add an event listener

@@ -35,10 +35,18 @@ const withVoltra: VoltraConfigPlugin = (config, props = {}) => {
     // Ensure URL scheme is set for widget deep linking
     config = ensureURLScheme(config)
 
+    // Derive a default keychainGroup from bundle identifier when any widget uses server-driven updates
+    const hasServerDrivenWidgets = props?.widgets?.some((w) => w.serverUpdate) ?? false
+    const keychainGroup =
+      props?.keychainGroup ??
+      (hasServerDrivenWidgets ? `$(AppIdentifierPrefix)${config.ios?.bundleIdentifier}` : undefined)
+
     // Configure iOS main app (Info.plist, entitlements, EAS)
     config = withIOS(config, {
       groupIdentifier: props?.groupIdentifier,
       widgetIds: props?.widgets && props.widgets.length > 0 ? props.widgets.map((w) => w.id) : undefined,
+      widgets: props?.widgets,
+      keychainGroup,
     })
 
     // Configure iOS widget extension (files, xcode, podfile, plist, eas)
@@ -50,6 +58,7 @@ const withVoltra: VoltraConfigPlugin = (config, props = {}) => {
       version,
       buildNumber,
       ...(props?.groupIdentifier ? { groupIdentifier: props.groupIdentifier } : {}),
+      ...(keychainGroup ? { keychainGroup } : {}),
       ...(props?.fonts ? { fonts: props.fonts } : {}),
     })
   }
@@ -75,8 +84,10 @@ export default withVoltra
 export type {
   AndroidPluginConfig,
   AndroidWidgetConfig,
+  AndroidWidgetServerUpdateConfig,
   ConfigPluginProps,
   VoltraConfigPlugin,
   WidgetConfig,
   WidgetFamily,
+  WidgetServerUpdateConfig,
 } from './types'
