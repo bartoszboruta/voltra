@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TextStyle {
   var color: Color = .primary
+  var usesPrimaryColorInReducedPresentation = false
   var fontSize: CGFloat = 17
   var fontWeight: Font.Weight = .regular
   var fontFamily: String?
@@ -16,6 +17,18 @@ struct TextStyle {
 
 struct TextStyleModifier: ViewModifier {
   let style: TextStyle
+  @Environment(\.voltraEnvironment) private var voltraEnvironment
+
+  private var resolvedColor: Color {
+    if let widget = voltraEnvironment.widget,
+       widget.usesReducedBackgroundPresentation,
+       style.usesPrimaryColorInReducedPresentation
+    {
+      return .primary
+    }
+
+    return style.color
+  }
 
   func body(content: Content) -> some View {
     content
@@ -28,7 +41,7 @@ struct TextStyleModifier: ViewModifier {
           : .system(size: style.fontSize, weight: style.fontWeight)
       )
       // 2. Color
-      .foregroundColor(style.color)
+      .foregroundColor(resolvedColor)
       // 3. Layout / Spacing
       .multilineTextAlignment(style.alignment)
       .lineLimit(style.lineLimit)
