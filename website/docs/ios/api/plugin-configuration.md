@@ -94,10 +94,10 @@ Array of widget configurations for Home Screen widgets. Each widget will be avai
 **Widget Configuration Properties:**
 
 - `id`: Unique identifier for the widget (alphanumeric with underscores only)
-- `displayName`: Name shown in the widget gallery
-- `description`: Description shown in the widget gallery
+- `displayName`: Name shown in the widget gallery (plain string, or per-locale map like `{ "en": "Weather", "pl": "Pogoda" }`; locale keys are BCP‑47-style tags)
+- `description`: Description shown in the widget gallery (same localization rules as `displayName`)
 - `supportedFamilies`: Array of supported widget sizes (`systemSmall`, `systemMedium`, `systemLarge`)
-- `initialStatePath`: (optional) Path to a file that exports initial widget state (see [Widget Pre-rendering](../development/widget-pre-rendering))
+- `initialStatePath`: (optional) Project-relative path to a file that exports initial widget state, **or** a locale map of paths for localized build-time pre-rendering (see [Widget Pre-rendering](../development/widget-pre-rendering))
 - `serverUpdate`: (optional) Enable server-driven updates. See [Server-driven widgets](../development/server-driven-widgets) for full details.
   - `url`: The Voltra SSR endpoint URL
   - `intervalMinutes`: Update interval in minutes (default: `15`)
@@ -113,7 +113,10 @@ Array of widget configurations for Home Screen widgets. Each widget will be avai
       "displayName": "Weather Widget",
       "description": "Current weather conditions",
       "supportedFamilies": ["systemSmall", "systemMedium", "systemLarge"],
-      "initialStatePath": "./widgets/weather-initial.tsx",
+      "initialStatePath": {
+        "en": "./widgets/weather-initial.tsx",
+        "pl": "./widgets/weather-initial-pl.tsx"
+      },
       "serverUpdate": {
         "url": "https://api.example.com/widgets/render",
         "intervalMinutes": 30,
@@ -123,3 +126,36 @@ Array of widget configurations for Home Screen widgets. Each widget will be avai
   ]
 }
 ```
+
+### Localizing `displayName` and `description`
+
+Use a locale map when the widget gallery label should be translated:
+
+```json
+{
+  "widgets": [
+    {
+      "id": "weather",
+      "displayName": {
+        "en": "Weather",
+        "pl": "Pogoda",
+        "zh-Hans": "天气"
+      },
+      "description": {
+        "en": "Current weather conditions",
+        "pl": "Aktualne warunki pogodowe",
+        "zh-Hans": "当前天气状况"
+      }
+    }
+  ]
+}
+```
+
+Use BCP-47-style locale tags such as `en`, `en-US`, `pt-BR`, or `zh-Hans`.
+
+Fallback behavior:
+
+- Voltra first tries the device locale.
+- If there is no exact match, it falls back to the language-only match.
+- If there is still no match, it prefers an English locale such as `en` or `en-US`.
+- If no English entry exists, it uses the first configured locale.

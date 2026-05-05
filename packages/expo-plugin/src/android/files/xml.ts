@@ -4,6 +4,7 @@ import * as path from 'path'
 
 import type { AndroidWidgetConfig } from '../../types'
 import { logger } from '../../utils/logger'
+import { isWidgetLocalizedMap, widgetLabelEnglish } from '../../utils/widgetLabel'
 
 export interface GenerateXmlFilesProps {
   platformProjectRoot: string
@@ -25,7 +26,8 @@ export async function generateWidgetInfoFiles(props: {
 }): Promise<void> {
   const { platformProjectRoot, widgets } = props
   const xmlPath = path.join(platformProjectRoot, 'app', 'src', 'main', 'res', 'xml')
-  const valuesPath = path.join(platformProjectRoot, 'app', 'src', 'main', 'res', 'values')
+  const mainRes = path.join(platformProjectRoot, 'app', 'src', 'main', 'res')
+  const valuesPath = path.join(mainRes, 'values')
 
   // Ensure directories exist
   if (!fs.existsSync(xmlPath)) {
@@ -35,10 +37,30 @@ export async function generateWidgetInfoFiles(props: {
     fs.mkdirSync(valuesPath, { recursive: true })
   }
 
-  // Generate string resources for all widgets
-  const stringsPath = path.join(valuesPath, 'voltra_widgets.xml')
-  const stringsContent = generateStringResourcesXml(widgets)
-  fs.writeFileSync(stringsPath, stringsContent, 'utf8')
+  // Default strings (development / fallback language — prefers English locale entries in locale maps): res/values/voltra_widgets.xml
+  const stringsPath = path.join(valuesPath, VOLTRA_WIDGET_STRINGS_FILE)
+  fs.writeFileSync(stringsPath, generateVoltraWidgetsStringResourcesXml(widgets, null), 'utf8')
+
+  const localeKeys = collectAndroidLocaleKeysFromWidgets(widgets)
+  /** Qualifiers we generated under res/values-<qualifier>/ (Android resource folder suffixes) */
+  const generatedQualifiers = new Set<string>()
+
+  for (const localeKey of localeKeys) {
+    const qualifier = localeKeyToAndroidValuesQualifier(localeKey)
+    if (qualifier === DEFAULT_WIDGET_LOCALE_QUALIFIER) {
+      continue
+    }
+    generatedQualifiers.add(qualifier)
+    const localizedValuesDir = path.join(mainRes, `values-${qualifier}`)
+    fs.mkdirSync(localizedValuesDir, { recursive: true })
+    fs.writeFileSync(
+      path.join(localizedValuesDir, VOLTRA_WIDGET_STRINGS_FILE),
+      generateVoltraWidgetsStringResourcesXml(widgets, localeKey),
+      'utf8'
+    )
+  }
+
+  cleanupStaleVoltraWidgetLocaleFiles(mainRes, generatedQualifiers)
 }
 
 /**
@@ -131,27 +153,183 @@ function generateWidgetInfoXml(
 }
 
 // ============================================================================
-// String Resources XML
+// String Resources XML (multilingual: res/values/ + res/values-<locale>/)
+// https://stackoverflow.com/questions/47976576/working-with-strings-xml-and-translations
+// https://developer.android.com/guide/topics/resources/localization
 // ============================================================================
 
+const VOLTRA_WIDGET_STRINGS_FILE = 'voltra_widgets.xml'
+
+/** Locale maps use `en` for the canonical default English locale; unqualified `values/` covers that so skip `values-en/`. */
+const DEFAULT_WIDGET_LOCALE_QUALIFIER = 'en'
+
+function isAlpha(value: string): boolean {
+  return /^[a-z]+$/i.test(value)
+}
+
+function isNumeric(value: string): boolean {
+  return /^\d+$/.test(value)
+}
+
+function isScriptSubtag(value: string): boolean {
+  return value.length === 4 && isAlpha(value)
+}
+
+function isRegionSubtag(value: string): boolean {
+  return (value.length === 2 && isAlpha(value)) || (value.length === 3 && isNumeric(value))
+}
+
+function formatScriptSubtag(value: string): string {
+  const lower = value.toLowerCase()
+  return `${lower[0]?.toUpperCase() ?? ''}${lower.slice(1)}`
+}
+
 /**
- * Generates string resources for widget display names and descriptions
+ * Maps BCP-style locale keys from app.json to Android resource folder qualifiers.
+ * Examples: `pl` → `pl`, `pt-BR` / `pt_BR` → `pt-rBR`, `zh-Hans` → `b+zh+Hans`
  */
-function generateStringResourcesXml(widgets: AndroidWidgetConfig[]): string {
+function localeKeyToAndroidValuesQualifier(localeKey: string): string {
+  const normalized = localeKey.trim().replace(/_/g, '-')
+  const segments = normalized.split('-').filter(Boolean)
+
+  const language = segments[0]?.toLowerCase()
+  if (!language) {
+    return normalized.toLowerCase()
+  }
+
+  const rest = segments.slice(1)
+  if (rest.length === 0) {
+    return language
+  }
+
+  const [first, ...tail] = rest
+  if (first && isRegionSubtag(first) && tail.length === 0) {
+    return `${language}-r${first.toUpperCase()}`
+  }
+
+  const bcp47Segments = [language]
+  for (const segment of rest) {
+    if (isScriptSubtag(segment)) {
+      bcp47Segments.push(formatScriptSubtag(segment))
+      continue
+    }
+    if (isRegionSubtag(segment)) {
+      bcp47Segments.push(segment.toUpperCase())
+      continue
+    }
+    bcp47Segments.push(segment.toLowerCase())
+  }
+
+  return `b+${bcp47Segments.join('+')}`
+}
+
+export const __test__ = {
+  localeKeyToAndroidValuesQualifier,
+}
+
+function collectAndroidLocaleKeysFromWidgets(widgets: AndroidWidgetConfig[]): Set<string> {
+  const locales = new Set<string>()
+  for (const w of widgets) {
+    for (const field of ['displayName', 'description'] as const) {
+      const v = w[field]
+      if (isWidgetLocalizedMap(v)) {
+        for (const [localeKey, text] of Object.entries(v)) {
+          if (typeof text === 'string' && text.trim()) {
+            locales.add(localeKey)
+          }
+        }
+      }
+    }
+  }
+  return locales
+}
+
+function resolveAndroidWidgetLabel(
+  widget: AndroidWidgetConfig,
+  field: 'displayName' | 'description',
+  localeKey: string | null
+): string {
+  const v = widget[field]
+  if (!isWidgetLocalizedMap(v)) {
+    return v
+  }
+  if (localeKey !== null) {
+    const localized = v[localeKey]
+    if (typeof localized === 'string' && localized.trim()) {
+      return localized
+    }
+  }
+  return widgetLabelEnglish(v)
+}
+
+function escapeAndroidStringRes(text: string): string {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+function generateVoltraWidgetsStringResourcesXml(widgets: AndroidWidgetConfig[], localeKey: string | null): string {
+  const localeComment =
+    localeKey === null
+      ? 'default (values/)'
+      : `locale ${localeKey} → values-${localeKeyToAndroidValuesQualifier(localeKey)}`
+
   const stringEntries = widgets
-    .map(
-      (widget) =>
-        `<string name="voltra_widget_${widget.id}_label">${widget.displayName}</string>\n    <string name="voltra_widget_${widget.id}_description">${widget.description}</string>`
-    )
+    .map((widget) => {
+      const label = escapeAndroidStringRes(resolveAndroidWidgetLabel(widget, 'displayName', localeKey))
+      const desc = escapeAndroidStringRes(resolveAndroidWidgetLabel(widget, 'description', localeKey))
+      return `<string name="voltra_widget_${widget.id}_label">${label}</string>\n    <string name="voltra_widget_${widget.id}_description">${desc}</string>`
+    })
     .join('\n    ')
 
   return dedent`
     <?xml version="1.0" encoding="utf-8"?>
     <resources>
-        <!-- Voltra Widget Labels and Descriptions (Auto-generated) -->
+        <!-- Voltra widget picker strings (auto-generated). ${localeComment} -->
         ${stringEntries}
     </resources>
   `
+}
+
+/**
+ * Removes generated voltra_widgets.xml from values-<qualifier>/ folders we no longer use.
+ */
+function cleanupStaleVoltraWidgetLocaleFiles(mainRes: string, activeQualifiers: Set<string>): void {
+  if (!fs.existsSync(mainRes)) {
+    return
+  }
+
+  for (const entry of fs.readdirSync(mainRes)) {
+    if (!entry.startsWith('values-')) {
+      continue
+    }
+
+    const qualifier = entry.slice('values-'.length)
+    const stringsFile = path.join(mainRes, entry, VOLTRA_WIDGET_STRINGS_FILE)
+    if (!fs.existsSync(stringsFile)) {
+      continue
+    }
+
+    if (activeQualifiers.has(qualifier)) {
+      continue
+    }
+
+    fs.unlinkSync(stringsFile)
+    try {
+      const dir = path.join(mainRes, entry)
+      if (fs.readdirSync(dir).length === 0) {
+        fs.rmdirSync(dir)
+      }
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 // ============================================================================
@@ -169,12 +347,12 @@ function generatePlaceholderLayoutXml(): string {
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?android:attr/colorBackground">
-        <TextView
+        <ProgressBar
+            style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Loading..."
-            android:textColor="?android:attr/textColorPrimary" />
+            android:indeterminate="true" />
     </FrameLayout>
   `
 }

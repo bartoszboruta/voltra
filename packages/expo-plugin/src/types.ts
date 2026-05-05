@@ -9,6 +9,20 @@ import { ConfigPlugin } from '@expo/config-plugins'
 // ============================================================================
 
 /**
+ * Per-locale strings for widget picker/gallery labels (`displayName`, `description`).
+ * Keys should be BCP-47-style locale tags (e.g. `en`, `pl`, `pt-BR`). Plain `string` is still allowed for a single-language setup.
+ */
+export type WidgetLocalizedCopy = Record<string, string>
+
+export type WidgetLabel = string | WidgetLocalizedCopy
+
+/**
+ * Build-time widget initial state source: a single file path, or per-locale paths (same key rules as `WidgetLocalizedCopy`).
+ * Each path must point to a module that exports the widget variants / default export for prerendering.
+ */
+export type WidgetInitialStatePath = string | WidgetLocalizedCopy
+
+/**
  * Supported widget size families
  */
 export type WidgetFamily =
@@ -30,23 +44,24 @@ export interface WidgetConfig {
    */
   id: string
   /**
-   * Display name shown in the widget gallery
+   * Display name shown in the widget gallery.
+   * For locale maps, keys must be BCP-47-like (`en`, `pl`, `pt-BR`, `zh-Hans`); include an English locale when possible so defaults align with Android `values/` and iOS fallbacks.
    */
-  displayName: string
+  displayName: WidgetLabel
   /**
-   * Description shown in the widget gallery
+   * Description shown in the widget gallery (same rules as `displayName`).
    */
-  description: string
+  description: WidgetLabel
   /**
    * Supported widget sizes
    * @default ['systemSmall', 'systemMedium', 'systemLarge']
    */
   supportedFamilies?: WidgetFamily[]
   /**
-   * Path to a file that default exports a WidgetVariants object for initial widget state.
+   * Path to a file that default exports a WidgetVariants object for initial widget state (or a locale map of paths).
    * This will be pre-rendered at build time and bundled into the iOS app.
    */
-  initialStatePath?: string
+  initialStatePath?: WidgetInitialStatePath
   /**
    * Configuration for server-driven widget updates.
    * When configured, the widget will periodically fetch new content from a remote server
@@ -89,6 +104,8 @@ export interface WidgetFiles {
   plistFiles: string[]
   assetDirectories: string[]
   intentFiles: string[]
+  /** Paths relative to the widget extension root (e.g. en.lproj/VoltraWidgets.strings) */
+  localizedStringResources: string[]
 }
 
 // ============================================================================
@@ -104,13 +121,13 @@ export interface AndroidWidgetConfig {
    */
   id: string
   /**
-   * Display name shown in the widget picker
+   * Display name shown in the widget picker (same localization rules as iOS `widgets[].displayName`).
    */
-  displayName: string
+  displayName: WidgetLabel
   /**
-   * Description shown in the widget picker
+   * Description shown in the widget picker (same localization rules as iOS `widgets[].description`).
    */
-  description: string
+  description: WidgetLabel
   /**
    * Minimum width in dp. If provided, takes precedence over minCellWidth.
    */
@@ -146,10 +163,10 @@ export interface AndroidWidgetConfig {
    */
   widgetCategory?: 'home_screen' | 'keyguard' | 'home_screen|keyguard'
   /**
-   * Path to a file that default exports a WidgetVariants object for initial widget state.
+   * Path to a file that default exports a WidgetVariants object for initial widget state (or a locale map of paths).
    * This will be pre-rendered at build time and bundled into the app.
    */
-  initialStatePath?: string
+  initialStatePath?: WidgetInitialStatePath
   /**
    * Configuration for server-driven widget updates.
    * When configured, the widget will periodically fetch new content from a remote server
